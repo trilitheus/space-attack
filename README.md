@@ -4,14 +4,90 @@ A Galaxian-inspired browser arcade game made with TypeScript and Phaser. Defend 
 
 All game artwork is bundled as smooth SVG illustrations and rasterised at double resolution by Phaser, with no image downloads required. Aliens have shaded bodies and expressive faces; the player ship has cockpit glass, gentle banking, and an animated engine plume above a subtle Earth horizon. Player and alien missiles have distinct shaded bodies and glowing tips, without exhaust trails. Instructions use larger, higher-contrast text with a stacked layout on smaller screens.
 
-## Run
+## Requirements
 
-```sh
-npm install
+- **Node.js 24 LTS**, including npm, is recommended. This project was built with Node.js 24.13.1 and npm 11.8.0. The installed Vite version requires Node.js 20.19+ or 22.12+; Node.js 18 is too old.
+- **Git** to clone the repository, or download and extract its ZIP from GitHub.
+- A modern browser with JavaScript enabled, such as Chrome, Firefox, Safari, or Edge.
+- Internet access for the initial dependency installation. No backend, database, API keys, or environment variables are needed.
+
+## Run on Linux
+
+Install Node.js 24 with npm using the [official Node.js download instructions](https://nodejs.org/en/download) for Linux. Install Git using your distribution's package manager or the [Git Linux instructions](https://git-scm.com/install/linux).
+
+Open a terminal and run:
+
+```bash
+node --version
+npm --version
+git clone https://github.com/trilitheus/space-attack.git
+cd space-attack
+npm ci
 npm run dev
 ```
 
-Open the URL printed by Vite. `npm run build` checks TypeScript and creates the production site in `dist`; `npm run preview` serves that build.
+Open **http://localhost:5173/** in your browser, or use the Local URL printed by Vite if that port is already in use. Leave the terminal running while you play. Press **Ctrl+C** to stop the server.
+
+## Run on Windows
+
+Install Node.js 24 using the Windows installer from the [official Node.js download page](https://nodejs.org/en/download), keeping npm and the PATH option enabled. Install [Git for Windows](https://git-scm.com/install/windows), then open a new **PowerShell** or **Command Prompt** window so it picks up the installed commands.
+
+Run the following in either shell. Using `npm.cmd` also avoids PowerShell's script execution policy blocking `npm.ps1`.
+
+```powershell
+node --version
+npm.cmd --version
+git clone https://github.com/trilitheus/space-attack.git
+cd space-attack
+npm.cmd ci
+npm.cmd run dev
+```
+
+Open **http://localhost:5173/** in your browser, or the Local URL printed by Vite. Keep the terminal open while playing. Press **Ctrl+C** to stop the server; Command Prompt may also ask you to confirm termination.
+
+## Run on macOS
+
+Install Node.js 24 using the macOS installer from the [official Node.js download page](https://nodejs.org/en/download). Install Git using the [Git macOS instructions](https://git-scm.com/install/mac), then open a new **Terminal** window.
+
+```bash
+node --version
+npm --version
+git clone https://github.com/trilitheus/space-attack.git
+cd space-attack
+npm ci
+npm run dev
+```
+
+Open **http://localhost:5173/** in Safari or another modern browser, or use the Local URL printed by Vite. Leave Terminal running while playing, and press **Ctrl+C** to stop the server.
+
+### If you already have the project
+
+Skip the `git clone` step and change into your existing `space-attack` folder instead. If you downloaded a ZIP, extract it first and open a terminal in the extracted folder containing `package.json`.
+
+Run `npm ci` once to install the versions recorded in `package-lock.json`, and again after pulling changes to that file. For later play sessions, just run `npm run dev` from the project folder. On Windows, use `npm.cmd` in place of `npm` in these instructions.
+
+## Build and preview the production version
+
+From the project folder, with dependencies installed:
+
+```bash
+npm run build
+npm run preview
+```
+
+The build checks TypeScript and writes the production website to **`dist/`**. Preview normally serves it at **http://localhost:4173/**; use the URL printed in the terminal. On Windows, run `npm.cmd run build` and `npm.cmd run preview`.
+
+To publish the game, upload the contents of `dist/` to a static web host. The preview command is for checking the build locally. Serve the game over HTTP rather than double-clicking `index.html`.
+
+## Troubleshooting
+
+- **`node`, `npm`, or `git` not found:** install the missing tool and reopen your terminal. Check `node --version` and `npm --version` before installing dependencies.
+- **Unsupported Node.js version:** install Node.js 24, reopen the terminal, and run `npm ci` again.
+- **PowerShell says scripts are disabled:** use `npm.cmd` as shown above, or run the commands in Command Prompt.
+- **`package.json` cannot be found:** change into the project folder before running npm commands.
+- **Port 5173 is occupied:** Vite chooses another available port. Open the Local URL it prints, or request one explicitly with `npm run dev -- --port 5174`.
+- **Dependency installation fails:** check your internet connection and access to the npm registry, then retry `npm ci`.
+- **Changes are not visible:** keep the dev server running and refresh the page. Use a hard refresh if the browser has cached an older version.
 
 ## Play
 
