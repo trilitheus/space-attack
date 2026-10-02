@@ -1,5 +1,11 @@
 export const FIELD = { width: 1200, height: 720, playerY: 650 };
 export type AlienKind = 'scout' | 'crab' | 'manta' | 'squid';
+export type Difficulty = 'easy' | 'medium' | 'hard';
+export const DIFFICULTIES: Record<Difficulty, { speed: number; columns: number; description: string }> = {
+  easy: { speed: .8, columns: -1, description: 'Fewer invaders. Slower attacks. Room to regroup.' },
+  medium: { speed: 1, columns: 0, description: 'The original mission. A balanced fight for Earth.' },
+  hard: { speed: 1.25, columns: 1, description: 'More invaders. Faster missiles. Relentless attacks.' },
+};
 
 // Each silhouette has a different flight profile; colour remains reserved for health.
 export const ALIENS: Record<AlienKind, { speed: number; weave: number }> = {
@@ -9,20 +15,22 @@ export const ALIENS: Record<AlienKind, { speed: number; weave: number }> = {
   squid: { speed: .95, weave: 85 },
 };
 
-export function waveSettings(wave: number) {
+export function waveSettings(wave: number, difficulty: Difficulty = 'medium') {
+  const profile = DIFFICULTIES[difficulty];
   return {
-    columns: Math.min(10, 6 + Math.floor(wave / 2)),
+    columns: Math.min(10, 6 + Math.floor(wave / 2) + profile.columns),
     rows: Math.min(5, 2 + Math.floor((wave - 1) / 2)),
-    formationRate: Math.min(1.4, .35 + (wave - 1) * .1),
+    formationRate: Math.min(1.4, .35 + (wave - 1) * .1) * profile.speed,
     formationSwing: Math.min(200, 90 + (wave - 1) * 14),
-    attackInterval: Math.max(.45, 3.2 - (wave - 1) * .3),
-    diveSpeed: Math.min(300, 75 + (wave - 1) * 18),
-    shotSpeed: Math.min(350, 105 + (wave - 1) * 22),
+    attackInterval: Math.max(.45, 3.2 - (wave - 1) * .3) / profile.speed,
+    diveSpeed: Math.min(300, 75 + (wave - 1) * 18) * profile.speed,
+    shotSpeed: Math.min(350, 105 + (wave - 1) * 22) * profile.speed,
+    speedMultiplier: profile.speed,
   };
 }
 
-export function formationPosition(homeX: number, homeY: number, phase: number, elapsed: number, wave: number) {
-  const tuning = waveSettings(wave);
+export function formationPosition(homeX: number, homeY: number, phase: number, elapsed: number, wave: number, difficulty: Difficulty = 'medium') {
+  const tuning = waveSettings(wave, difficulty);
   return {
     x: Math.max(24, Math.min(FIELD.width - 24,
       homeX + Math.sin(elapsed * tuning.formationRate) * tuning.formationSwing

@@ -91,16 +91,26 @@ To publish the game, upload the contents of `dist/` to a static web host. The pr
 
 ## Play
 
-- Left/right arrows or A/D: move
+- Arrow keys or W/A/S/D: move horizontally and vertically
 - Space: fire (hold for continuous fire)
 - Enter: start, restart, or resume
 - P or Escape: pause/resume
-- On-screen buttons provide touch controls on small screens
+- On-screen directional buttons and a fire button provide touch controls on small screens
 
-The playfield is 1200 × 720 and scales to the available screen width. You have three shields and a brief immunity period after taking damage. Diving enemies award bonus points. Wave 1 starts gently with 12 aliens; the first six waves have 12, 14, 21, 24, 32, and 36 enemies. Counts grow to a maximum of 50, while movement, diving, and firing become faster.
+The playfield is 1200 × 720 and scales to the available screen width. You can evade in all directions within its bottom third; the ship and its engine remain inside the screen. Diagonal input is normalised to prevent a speed boost. You have three shields and a brief immunity period after taking damage. Diving enemies award bonus points.
+
+Choose **Easy**, **Medium**, or **Hard** on the start or game-over screen before launching. Difficulty stays fixed during a mission and is shown beside the wave number in the HUD.
+
+| Difficulty | First-wave aliens | Enemy speed | Attack frequency |
+| --- | --- | --- | --- |
+| Easy | 10 | 80% of Medium | Less frequent |
+| Medium | 12 | Original balance | Original balance |
+| Hard | 14 | 125% of Medium | More frequent |
+
+Enemy movement, dives, sweeping attacks, and missiles all follow the selected difficulty. Every mode retains three shields and introduces two-hit enemies on wave 3 and three-hit enemies on wave 5. Enemy counts and speeds increase across waves, with counts capped at 50. On Medium, the first six waves have 12, 14, 21, 24, 32, and 36 enemies.
 
 Four silhouettes have distinct flight profiles: scouts, slower weaving crabs, fast wide-sweeping mantas (wave 2 onward), and squids (wave 4 onward). Formations sway sideways, with individual aliens weaving within them. Mantas and squids sweep across the playfield during attacks and bounce at its edges; some scouts and crabs also sweep. Enemies that escape below the player re-enter above the screen and visibly descend back into formation.
 
-Species and armour are independent: wave 3 introduces two-hit orange enemies; wave 5 introduces three-hit green enemies. Colours always indicate remaining health: green → orange → red → destroyed. Best scores are saved locally when available.
+Species and armour are independent. Colours always indicate remaining health: green → orange → red → destroyed. Best scores are saved locally for each difficulty when storage is available. Existing best scores from before the difficulty picker are retained under Medium.
 
 Sound starts muted; click **SOUND OFF** in the game HUD to enable it. Layered effects distinguish player and alien weapons, armour impacts, explosions, shield damage, launch, wormhole waves, sector clears, and game over. Sounds are synthesised locally using Web Audio, with controlled volume and slight pitch variation for repeated effects. There are no audio downloads or background music. Muting or pausing stops currently playing effects.

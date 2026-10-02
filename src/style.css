@@ -28,6 +28,17 @@ h1{font-family:'Barlow Condensed',sans-serif;font-size:52px;letter-spacing:2px;m
 #game canvas{display:block}
 .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#080e1a22,#080e1ab8);text-align:center}
 .overlay.hidden{display:none}
+.hidden{display:none!important}
+.difficulty-picker{border:0;padding:0;margin:0 0 20px;max-width:440px}
+.difficulty-picker legend{color:#aebbd0;font-size:12px;letter-spacing:1px;margin-bottom:10px;width:100%}
+.difficulty-options{display:flex;justify-content:center;gap:8px}
+.difficulty-options label{position:relative;cursor:pointer}
+.difficulty-options input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.difficulty-options span{display:block;padding:10px 22px;border:1px solid #45546b;border-radius:5px;color:#b8c6da;font-size:14px;background:#101b2de6}
+.difficulty-options input:checked+span{color:#c2f996;border-color:#a5f664;background:#263b29}
+.difficulty-options input:focus-visible+span{outline:2px solid #d7eeff;outline-offset:3px}
+.difficulty-description{color:#a4b1c5;font-size:13px;line-height:1.6;min-height:21px;margin-top:10px;padding:0 12px}
+.wave-label{letter-spacing:1px}
 .badge{font-size:12px;color:#a5f664;border:1px solid #a5f644;background:#a5f60a;border-radius:20px;padding:7px 14px;letter-spacing:3px}
 .overlay h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(42px,7vw,82px);font-weight:800;line-height:.95;letter-spacing:5px;margin:24px 0 16px}
 .overlay h2 span{color:#a5f664}
@@ -49,6 +60,7 @@ kbd{display:inline-block;background:#172031;border:1px solid #354258;border-bott
 footer{gap:20px;flex-wrap:wrap;display:flex;justify-content:space-between;font-size:12px;letter-spacing:2px;color:#91a0b7;margin:30px 0}
 .touch{display:none}
 @media(max-width:1000px){.intro{align-items:start;flex-direction:column;gap:14px}
+.screen{min-height:500px}
 .intro p{font-size:15px}
 .support{grid-template-columns:1fr;gap:20px}
 .support p{font-size:16px}
@@ -60,7 +72,7 @@ main{padding:0 12px;margin:24px auto}
 .intro p{display:none}
 h1{font-size:40px}
 .hud{padding:14px;min-height:90px;height:auto;gap:15px;flex-wrap:wrap}
-.screen{min-height:340px}
+.screen{min-height:470px}
 .hud-right{margin-left:auto}
 .stats{gap:22px}
 .hud-right{gap:10px}
@@ -78,4 +90,14 @@ h1{font-size:40px}
 .touch{display:flex;justify-content:space-between;margin-top:12px}
 .touch button{touch-action:none;background:#172031;color:#a5f664;border:1px solid #354258;border-radius:6px;padding:16px 25px}
 .touch div{display:flex;gap:8px}
+.touch .dpad{display:grid;grid-template-columns:repeat(3,48px);gap:5px}
+.touch .dpad button{padding:10px;width:48px;height:44px}
+.touch #up{grid-column:2;grid-row:1}
+.touch #left{grid-column:1;grid-row:2}
+.touch #down{grid-column:2;grid-row:2}
+.touch #right{grid-column:3;grid-row:2}
+.touch #fire{align-self:center;min-height:64px}
+.difficulty-options span{padding:9px 18px}
+.difficulty-description{max-width:330px;min-height:42px}
+.difficulty-picker{margin-bottom:16px}
 }
