@@ -1,0 +1,30 @@
+{
+  "name": "space-attack",
+  "version": "1.0.0",
+  "description": "A polished Galaxian-inspired browser arcade game built with TypeScript and Phaser 3",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trilitheus/space-attack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/trilitheus/space-attack/issues"
+  },
+  "homepage": "https://github.com/trilitheus/space-attack#readme",
+  "dependencies": {
+    "phaser": "^4.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2"
+  }
+}
