@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import './style.css';
+import { alienArtwork, shipArtwork, flameArtwork, shotArtwork, svgData } from './artwork';
 import { FIELD, ALIENS, alienKind, waveSettings, formationPosition, sweepStep, approach, type AlienKind } from './waves';
 
 const readBest = () => { try { return Number(localStorage.getItem('space-attack-best')) || 0; } catch { return 0; } };
@@ -17,6 +18,7 @@ type Enemy = { sprite: Phaser.GameObjects.Image; hp: number; maxHp: number; kind
 type Shot = { sprite: Phaser.GameObjects.Image; vx: number; vy: number };
 class SpaceAttack extends Phaser.Scene {
   player!: Phaser.GameObjects.Image;
+  engine!: Phaser.GameObjects.Image;
   stars: { dot: Phaser.GameObjects.Rectangle; speed: number }[] = [];
   enemies: Enemy[] = []; shots: Shot[] = []; hostile: Shot[] = [];
   keys!: Record<string, Phaser.Input.Keyboard.Key>;
@@ -24,21 +26,18 @@ class SpaceAttack extends Phaser.Scene {
   score = 0; best = readBest(); wave = 1; lives = 3; elapsed = 0;
   nextFire = 0; nextAttack = 0; nextWave = 0; invulnerable = 0;
   muted = true; audio?: AudioContext; touch = { left: false, right: false, fire: false };
-  create() {
-    const g = this.make.graphics({x:0,y:0});
-    g.fillStyle(0xffffff); g.fillPoints([{x:18,y:0},{x:23,y:20},{x:34,y:31},{x:34,y:38},{x:22,y:33},{x:18,y:38},{x:14,y:33},{x:2,y:38},{x:2,y:31},{x:13,y:20}].map(p=>new Phaser.Math.Vector2(p.x,p.y)),true); g.generateTexture('ship',36,40); g.clear();
-    for (const [kind, design] of Object.entries(ALIENS)) {
-      g.fillStyle(0xffffff);
-      design.pixels.forEach((line, y) => [...line].forEach((pixel, x) => {
-        if (pixel === '1') g.fillRect(x * 3, y * 3, 3, 3);
-      }));
-      g.generateTexture(kind, 33, 24);
-      g.clear();
+  preload() {
+    const load = (key: string, svg: string) => this.load.svg(key, svgData(svg), { scale: 2 });
+    load('ship', shipArtwork);load('engine', flameArtwork);load('shot', shotArtwork);
+    for (const kind of Object.keys(ALIENS) as AlienKind[]) {
+      for (let hp=1;hp<=3;hp++) load(`${kind}-${hp}`, alienArtwork(kind,hp));
     }
-    g.fillStyle(0xffffff);g.fillRoundedRect(0,0,4,15,2);g.generateTexture('shot',4,15);g.destroy();
+  }
+  create() {
     for(let i=0;i<150;i++) this.stars.push({dot:this.add.rectangle(Phaser.Math.Between(0,FIELD.width),Phaser.Math.Between(0,FIELD.height),i%9===0?2:1,i%9===0?2:1,0x9ebcde,Phaser.Math.FloatBetween(.15,.65)),speed:Phaser.Math.Between(12,55)});
     this.add.circle(FIELD.width/2,FIELD.height*.42,240,0x16304b,.09);
-    this.player=this.add.image(FIELD.width/2,FIELD.playerY,'ship').setTint(0xa5f664).setDepth(5);
+    this.player=this.add.image(FIELD.width/2,FIELD.playerY,'ship').setDisplaySize(48,54).setDepth(5);
+    this.engine=this.add.image(this.player.x,this.player.y+34,'engine').setDisplaySize(14,28).setDepth(4);
     this.keys=this.input.keyboard!.addKeys('LEFT,RIGHT,A,D,SPACE,ENTER,P,ESC') as Record<string,Phaser.Input.Keyboard.Key>;
     this.input.keyboard!.addCapture(['SPACE','LEFT','RIGHT']);
     this.keys.ENTER.on('down',()=>{if(this.mode==='ready'||this.mode==='over')this.start();else if(this.mode==='paused')this.pause();});
@@ -54,14 +53,14 @@ class SpaceAttack extends Phaser.Scene {
     try{this.audio??=new AudioContext();void this.audio.resume();const osc=this.audio.createOscillator(),gain=this.audio.createGain();osc.type=type;osc.frequency.setValueAtTime(frequency,this.audio.currentTime);osc.frequency.exponentialRampToValueAtTime(frequency*.4,this.audio.currentTime+duration);gain.gain.setValueAtTime(.035,this.audio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,this.audio.currentTime+duration);osc.connect(gain);gain.connect(this.audio.destination);osc.start();osc.stop(this.audio.currentTime+duration);}catch{/* Audio is optional. */}
   }
   clearObjects(){for(const e of this.enemies)e.sprite.destroy();for(const s of [...this.shots,...this.hostile])s.sprite.destroy();this.enemies=[];this.shots=[];this.hostile=[];}
-  start(){this.clearObjects();this.mode='playing';this.score=0;this.lives=3;this.wave=1;this.elapsed=0;this.nextFire=0;this.nextWave=0;this.invulnerable=1.5;this.player.setPosition(FIELD.width/2,FIELD.playerY).setAlpha(1);el('overlay').classList.add('hidden');this.formation();this.hud();this.tone(660,.2,'triangle');}
+  start(){this.clearObjects();this.mode='playing';this.score=0;this.lives=3;this.wave=1;this.elapsed=0;this.nextFire=0;this.nextWave=0;this.invulnerable=1.5;this.player.setPosition(FIELD.width/2,FIELD.playerY).setAlpha(1);this.engine.setVisible(true);el('overlay').classList.add('hidden');this.formation();this.hud();this.tone(660,.2,'triangle');}
   formation(preview=false){
     const { rows, columns, attackInterval } = waveSettings(this.wave);
     for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){
       const hp=this.wave>=5&&row===0?3:this.wave>=3&&row<2?2:1;
       const x=FIELD.width/2+(col-(columns-1)/2)*70,y=95+row*54;
       const kind=alienKind(this.wave,row,col);
-      this.enemies.push({sprite:this.add.image(x,y,kind).setTint(this.colour(hp)).setAlpha(preview?.42:1),hp,maxHp:hp,kind,homeX:x,homeY:y,dive:0,phase:Math.random()*6.28,state:'formation',sweep:false,vx:0,targetX:x});
+      this.enemies.push({sprite:this.add.image(x,y,`${kind}-${hp}`).setDisplaySize(44,37).setAlpha(preview?.42:1),hp,maxHp:hp,kind,homeX:x,homeY:y,dive:0,phase:Math.random()*6.28,state:'formation',sweep:false,vx:0,targetX:x});
     }
     this.nextAttack=this.elapsed+attackInterval;el('status').textContent=`WAVE ${String(this.wave).padStart(2,'0')} · ${this.wave>=5?'HEAVY ARMOUR DETECTED':this.wave>=3?'ARMOURED CONTACTS':'HOSTILES INBOUND'}`;
     if(!preview){const text=this.add.text(FIELD.width/2,FIELD.height/2,`WAVE ${String(this.wave).padStart(2,'0')}`,{fontFamily:'monospace',fontSize:'26px',color:'#a5f664',letterSpacing:5}).setOrigin(.5);this.tweens.add({targets:text,alpha:0,y:FIELD.height/2-20,duration:1300,onComplete:()=>text.destroy()});}
@@ -69,8 +68,8 @@ class SpaceAttack extends Phaser.Scene {
   colour(hp:number){return hp===3?0xa5f664:hp===2?0xffb45e:0xff617b;}
   hud(){el('score').textContent=String(this.score).padStart(6,'0');el('best').textContent=String(this.best).padStart(6,'0');el('wave').textContent=String(this.wave).padStart(2,'0');el('lives').textContent='◆'.repeat(this.lives)+'◇'.repeat(3-this.lives);}
   pause(){if(this.mode!=='playing'&&this.mode!=='paused')return;const paused=this.mode==='playing';this.mode=paused?'paused':'playing';this.tweens[paused?'pauseAll':'resumeAll']();el('overlay').classList.toggle('hidden',!paused);if(paused){el('badge').textContent='TAKE A BREATHER';el('title').innerHTML='MISSION<br><span>PAUSED</span>';el('description').innerHTML='Your corner of space can wait.';el('launch').textContent='RESUME MISSION ↗';el('hint').textContent='PRESS P OR ENTER TO RESUME';}el('status').textContent=paused?'MISSION PAUSED':`WAVE ${this.wave} · MISSION ACTIVE`;}
-  burst(x:number,y:number,colour:number,count=14){for(let i=0;i<count;i++){const p=this.add.rectangle(x,y,Phaser.Math.Between(2,5),Phaser.Math.Between(2,5),colour).setDepth(8);this.tweens.add({targets:p,x:x+Phaser.Math.Between(-60,60),y:y+Phaser.Math.Between(-60,60),alpha:0,angle:180,duration:Phaser.Math.Between(250,600),onComplete:()=>p.destroy()});}}
-  hitPlayer(){if(this.invulnerable>0||this.mode!=='playing')return;this.lives--;this.invulnerable=2;this.burst(this.player.x,this.player.y,0xa5f664,22);this.cameras.main.shake(160,.007);this.tone(90,.25,'sawtooth');this.hud();if(this.lives<=0){this.mode='over';this.player.setAlpha(0);if(this.score>this.best){this.best=this.score;try{localStorage.setItem('space-attack-best',String(this.best));}catch{/* Storage may be unavailable. */}}this.hud();el('overlay').classList.remove('hidden');el('badge').textContent=this.score===this.best&&this.score>0?'NEW PERSONAL BEST':'MISSION COMPLETE';el('title').innerHTML='GAME<br><span>OVER</span>';el('description').innerHTML=`${String(this.score).padStart(6,'0')} POINTS · WAVE ${String(this.wave).padStart(2,'0')}<br>Another flight. Another chance.`;el('launch').textContent='FLY AGAIN ↗';el('hint').textContent='OR PRESS ENTER TO RESTART';el('status').textContent='SIGNAL LOST · READY TO REDEPLOY';}}
+  burst(x:number,y:number,colour:number,count=14){for(let i=0;i<count;i++){const p=this.add.circle(x,y,Phaser.Math.FloatBetween(1.5,3.5),colour).setDepth(8);this.tweens.add({targets:p,x:x+Phaser.Math.Between(-60,60),y:y+Phaser.Math.Between(-60,60),alpha:0,angle:180,duration:Phaser.Math.Between(250,600),onComplete:()=>p.destroy()});}}
+  hitPlayer(){if(this.invulnerable>0||this.mode!=='playing')return;this.lives--;this.invulnerable=2;this.burst(this.player.x,this.player.y,0xa5f664,22);this.cameras.main.shake(160,.007);this.tone(90,.25,'sawtooth');this.hud();if(this.lives<=0){this.mode='over';this.player.setAlpha(0);this.engine.setVisible(false);if(this.score>this.best){this.best=this.score;try{localStorage.setItem('space-attack-best',String(this.best));}catch{/* Storage may be unavailable. */}}this.hud();el('overlay').classList.remove('hidden');el('badge').textContent=this.score===this.best&&this.score>0?'NEW PERSONAL BEST':'MISSION COMPLETE';el('title').innerHTML='GAME<br><span>OVER</span>';el('description').innerHTML=`${String(this.score).padStart(6,'0')} POINTS · WAVE ${String(this.wave).padStart(2,'0')}<br>Another flight. Another chance.`;el('launch').textContent='FLY AGAIN ↗';el('hint').textContent='OR PRESS ENTER TO RESTART';el('status').textContent='SIGNAL LOST · READY TO REDEPLOY';}}
   update(_time:number,delta:number){
     const dt=Math.min(delta/1000,.04);
     if(this.mode==='paused')return;
@@ -80,7 +79,9 @@ class SpaceAttack extends Phaser.Scene {
     this.elapsed+=dt;this.invulnerable=Math.max(0,this.invulnerable-dt);this.player.setAlpha(this.invulnerable>0?(Math.sin(this.elapsed*30)>0?.35:1):1);
     const left=this.keys.LEFT.isDown||this.keys.A.isDown||this.touch.left,right=this.keys.RIGHT.isDown||this.keys.D.isDown||this.touch.right;
     this.player.x=Phaser.Math.Clamp(this.player.x+((right?1:0)-(left?1:0))*420*dt,28,FIELD.width-28);
-    if((this.keys.SPACE.isDown||this.touch.fire)&&this.elapsed>=this.nextFire){this.shots.push({sprite:this.add.image(this.player.x,this.player.y-27,'shot').setTint(0xc3ff8c),vx:0,vy:-620});this.nextFire=this.elapsed+.18;this.tone(800,.055);}
+    this.player.rotation=Phaser.Math.Linear(this.player.rotation,((right?1:0)-(left?1:0))*.12,Math.min(1,dt*10));
+    this.engine.setPosition(this.player.x,this.player.y+34).setAlpha(this.player.alpha).setDisplaySize(14,26+Math.sin(this.elapsed*32)*4);
+    if((this.keys.SPACE.isDown||this.touch.fire)&&this.elapsed>=this.nextFire){this.shots.push({sprite:this.add.image(this.player.x,this.player.y-30,'shot').setDisplaySize(8,22).setTint(0xc3ff8c),vx:0,vy:-620});this.nextFire=this.elapsed+.18;this.tone(800,.055);}
     if(this.enemies.length&&this.elapsed>=this.nextAttack){
       const available=this.enemies.filter(e=>e.state==='formation');
       const e=Phaser.Utils.Array.GetRandom(available) as Enemy|undefined;
@@ -97,7 +98,7 @@ class SpaceAttack extends Phaser.Scene {
       if(shooter){
         const dx=this.player.x-shooter.sprite.x,dy=this.player.y-shooter.sprite.y;
         const len=Math.hypot(dx,dy)||1,speed=tuning.shotSpeed;
-        this.hostile.push({sprite:this.add.image(shooter.sprite.x,shooter.sprite.y+15,'shot').setTint(0xff617b),vx:dx/len*speed,vy:Math.max(65,dy/len*speed)});
+        this.hostile.push({sprite:this.add.image(shooter.sprite.x,shooter.sprite.y+15,'shot').setDisplaySize(8,22).setTint(0xff617b),vx:dx/len*speed,vy:Math.max(65,dy/len*speed)});
       }
     }
     for(const e of this.enemies){
@@ -130,10 +131,10 @@ class SpaceAttack extends Phaser.Scene {
         e.state='diving';e.sprite.y=FIELD.height+45;
       }
     }
-    for(const shot of this.shots){shot.sprite.y+=shot.vy*dt;for(const e of this.enemies){if(!shot.sprite.active)break;if(e.sprite.active&&Math.abs(shot.sprite.x-e.sprite.x)<18&&Math.abs(shot.sprite.y-e.sprite.y)<21){shot.sprite.destroy();e.hp--;this.burst(e.sprite.x,e.sprite.y,this.colour(Math.max(1,e.hp)),e.hp?5:14);this.tone(e.hp?200:140,.09,'triangle');if(e.hp<=0){this.score+=e.maxHp*100+(e.state==='diving'?50:0);e.sprite.destroy();}else{e.sprite.setTint(this.colour(e.hp));}this.hud();}}if(shot.sprite.active&&shot.sprite.y< -20)shot.sprite.destroy();}
+    for(const shot of this.shots){shot.sprite.y+=shot.vy*dt;for(const e of this.enemies){if(!shot.sprite.active)break;if(e.sprite.active&&Math.abs(shot.sprite.x-e.sprite.x)<18&&Math.abs(shot.sprite.y-e.sprite.y)<21){shot.sprite.destroy();e.hp--;this.burst(e.sprite.x,e.sprite.y,this.colour(Math.max(1,e.hp)),e.hp?5:14);this.tone(e.hp?200:140,.09,'triangle');if(e.hp<=0){this.score+=e.maxHp*100+(e.state==='diving'?50:0);e.sprite.destroy();}else{e.sprite.setTexture(`${e.kind}-${e.hp}`).setDisplaySize(44,37);}this.hud();}}if(shot.sprite.active&&shot.sprite.y< -20)shot.sprite.destroy();}
     this.enemies=this.enemies.filter(e=>e.sprite.active);this.shots=this.shots.filter(s=>s.sprite.active);
     for(const shot of this.hostile){shot.sprite.x+=shot.vx*dt;shot.sprite.y+=shot.vy*dt;if(Math.abs(shot.sprite.x-this.player.x)<17&&Math.abs(shot.sprite.y-this.player.y)<23){shot.sprite.destroy();this.hitPlayer();}else if(shot.sprite.y>FIELD.height+20||shot.sprite.x< -20||shot.sprite.x>FIELD.width+20)shot.sprite.destroy();}this.hostile=this.hostile.filter(s=>s.sprite.active);
     if(!this.enemies.length&&this.mode==='playing'){if(!this.nextWave){this.nextWave=this.elapsed+1.8;for(const s of this.hostile)s.sprite.destroy();this.hostile=[];el('status').textContent='SECTOR CLEAR · NEXT WAVE INBOUND';}else if(this.elapsed>=this.nextWave){this.wave++;this.nextWave=0;this.formation();this.hud();this.tone(520,.2,'triangle');}}
   }
 }
-new Phaser.Game({type:Phaser.AUTO,parent:'game',width:FIELD.width,height:FIELD.height,backgroundColor:'#090e1b',pixelArt:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:SpaceAttack});
+new Phaser.Game({type:Phaser.AUTO,parent:'game',width:FIELD.width,height:FIELD.height,backgroundColor:'#090e1b',pixelArt:false,antialias:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:SpaceAttack});

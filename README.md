@@ -1,6 +1,6 @@
 # Space Attack
 
-A Galaxian-inspired browser arcade game made with TypeScript and Phaser 3. All game artwork is drawn procedurally, with no image downloads required.
+A Galaxian-inspired browser arcade game made with TypeScript and Phaser 3. All game artwork is bundled as smooth SVG illustrations and rasterised at double resolution by Phaser, with no image downloads required. Aliens have shaded bodies and expressive faces; the player ship has cockpit glass, gentle banking, and an animated engine plume.
 
 ## Run
 
