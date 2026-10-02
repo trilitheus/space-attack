@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import './style.css';
+import { GameAudio } from './sound';
+import { Starfield } from './starfield';
 import { alienArtwork, shipArtwork, flameArtwork, shotArtwork, hostileShotArtwork, wormholeArtwork, earthArtwork, svgData } from './artwork';
 import { FIELD, ALIENS, alienKind, waveSettings, formationPosition, sweepStep, approach, arrivalPosition, wormholeAppearance, WORMHOLE, type AlienKind } from './waves';
 
@@ -22,13 +24,14 @@ class SpaceAttack extends Phaser.Scene {
   wormhole!: Phaser.GameObjects.Container;
   vortex!: Phaser.GameObjects.Image;
   waveStarted = 0; arrivalEnds = 0;
-  stars: { dot: Phaser.GameObjects.Rectangle; speed: number }[] = [];
+  starfield!: Starfield;
+  effects = new GameAudio();
   enemies: Enemy[] = []; shots: Shot[] = []; hostile: Shot[] = [];
   keys!: Record<string, Phaser.Input.Keyboard.Key>;
   mode: 'ready'|'playing'|'paused'|'over' = 'ready';
   score = 0; best = readBest(); wave = 1; lives = 3; elapsed = 0;
   nextFire = 0; nextAttack = 0; nextWave = 0; invulnerable = 0;
-  muted = true; audio?: AudioContext; touch = { left: false, right: false, fire: false };
+  touch = { left: false, right: false, fire: false };
   preload() {
     const load = (key: string, svg: string) => this.load.svg(key, svgData(svg), { scale: 2 });
     load('ship', shipArtwork);load('engine', flameArtwork);load('shot', shotArtwork);load('hostile-shot', hostileShotArtwork);load('wormhole', wormholeArtwork);load('earth', earthArtwork);
@@ -37,7 +40,7 @@ class SpaceAttack extends Phaser.Scene {
     }
   }
   create() {
-    for(let i=0;i<150;i++) this.stars.push({dot:this.add.rectangle(Phaser.Math.Between(0,FIELD.width),Phaser.Math.Between(0,FIELD.height),i%9===0?2:1,i%9===0?2:1,0x9ebcde,Phaser.Math.FloatBetween(.15,.65)),speed:Phaser.Math.Between(12,55)});
+    this.starfield=new Starfield(this);
     this.add.circle(FIELD.width/2,FIELD.height*.42,240,0x16304b,.09);
     this.add.image(FIELD.width/2,FIELD.height-15,'earth').setDisplaySize(FIELD.width,220).setAlpha(.35).setDepth(-1);
     this.vortex=this.add.image(0,0,'wormhole').setDisplaySize(220,220);
@@ -49,17 +52,14 @@ class SpaceAttack extends Phaser.Scene {
     this.keys.ENTER.on('down',()=>{if(this.mode==='ready'||this.mode==='over')this.start();else if(this.mode==='paused')this.pause();});
     this.keys.P.on('down',()=>this.pause());this.keys.ESC.on('down',()=>this.pause());
     el('launch').onclick=()=>this.mode==='paused'?this.pause():this.start();
-    el('mute').onclick=()=>{this.muted=!this.muted;el('mute').textContent=this.muted?'SOUND OFF':'SOUND ON';if(!this.muted)this.tone(440,.08);};
+    el('mute').setAttribute('aria-pressed','false');
+    el('mute').onclick=()=>{this.effects.setMuted(!this.effects.muted);el('mute').textContent=this.effects.muted?'SOUND OFF':'SOUND ON';el('mute').setAttribute('aria-pressed',String(!this.effects.muted));};
     for(const id of ['left','right','fire'] as const){const b=el(id);b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);this.touch[id]=true;};b.onpointerup=b.onpointercancel=()=>{this.touch[id]=false;};}
     window.addEventListener('blur',()=>{this.touch={left:false,right:false,fire:false};if(this.mode==='playing')this.pause();});
     this.formation(true);el('status').textContent='EARTH DEFENCE SYSTEMS READY';
   }
-  tone(frequency:number,duration:number,type:OscillatorType='square') {
-    if(this.muted)return;
-    try{this.audio??=new AudioContext();void this.audio.resume();const osc=this.audio.createOscillator(),gain=this.audio.createGain();osc.type=type;osc.frequency.setValueAtTime(frequency,this.audio.currentTime);osc.frequency.exponentialRampToValueAtTime(frequency*.4,this.audio.currentTime+duration);gain.gain.setValueAtTime(.035,this.audio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,this.audio.currentTime+duration);osc.connect(gain);gain.connect(this.audio.destination);osc.start();osc.stop(this.audio.currentTime+duration);}catch{/* Audio is optional. */}
-  }
   clearObjects(){for(const e of this.enemies)e.sprite.destroy();for(const s of [...this.shots,...this.hostile])s.sprite.destroy();this.enemies=[];this.shots=[];this.hostile=[];}
-  start(){this.clearObjects();this.mode='playing';this.score=0;this.lives=3;this.wave=1;this.elapsed=0;this.nextFire=0;this.nextWave=0;this.invulnerable=1.5;this.player.setPosition(FIELD.width/2,FIELD.playerY).setAlpha(1);this.engine.setVisible(true);el('overlay').classList.add('hidden');this.formation();this.hud();this.tone(660,.2,'triangle');}
+  start(){this.effects.stop();this.clearObjects();this.mode='playing';this.score=0;this.lives=3;this.wave=1;this.elapsed=0;this.nextFire=0;this.nextWave=0;this.invulnerable=1.5;this.player.setPosition(FIELD.width/2,FIELD.playerY).setAlpha(1);this.engine.setVisible(true);el('overlay').classList.add('hidden');this.formation();this.hud();this.effects.play('launch');}
   formation(preview=false){
     this.waveStarted=this.elapsed;
     const { rows, columns, attackInterval } = waveSettings(this.wave);
@@ -72,17 +72,17 @@ class SpaceAttack extends Phaser.Scene {
     this.arrivalEnds=this.elapsed+WORMHOLE.leadIn+(rows*columns-1)*WORMHOLE.stagger+WORMHOLE.travel;
     this.nextAttack=this.arrivalEnds+attackInterval;
     this.wormhole.setVisible(true);el('status').textContent=`WAVE ${String(this.wave).padStart(2,'0')} · ${this.wave>=5?'HEAVY ARMOUR DETECTED':this.wave>=3?'ARMOURED CONTACTS':'INVADERS IN EARTH ORBIT'}`;
-    if(!preview){el('status').textContent=`WAVE ${this.wave} · WORMHOLE BREACH DETECTED`;const text=this.add.text(FIELD.width/2,FIELD.height/2,`INVASION WAVE ${String(this.wave).padStart(2,'0')}`,{fontFamily:'monospace',fontSize:'30px',color:'#a5f664',letterSpacing:5}).setOrigin(.5);this.tweens.add({targets:text,alpha:0,y:FIELD.height/2-20,duration:1300,onComplete:()=>text.destroy()});}
+    if(!preview){if(this.wave>1)this.effects.play('wave');el('status').textContent=`WAVE ${this.wave} · WORMHOLE BREACH DETECTED`;const text=this.add.text(FIELD.width/2,FIELD.height/2,`INVASION WAVE ${String(this.wave).padStart(2,'0')}`,{fontFamily:'monospace',fontSize:'30px',color:'#a5f664',letterSpacing:5}).setOrigin(.5);this.tweens.add({targets:text,alpha:0,y:FIELD.height/2-20,duration:1300,onComplete:()=>text.destroy()});}
   }
   colour(hp:number){return hp===3?0xa5f664:hp===2?0xffb45e:0xff617b;}
   hud(){el('score').textContent=String(this.score).padStart(6,'0');el('best').textContent=String(this.best).padStart(6,'0');el('wave').textContent=String(this.wave).padStart(2,'0');el('lives').textContent='◆'.repeat(this.lives)+'◇'.repeat(3-this.lives);}
-  pause(){if(this.mode!=='playing'&&this.mode!=='paused')return;const paused=this.mode==='playing';this.mode=paused?'paused':'playing';this.tweens[paused?'pauseAll':'resumeAll']();el('overlay').classList.toggle('hidden',!paused);if(paused){el('badge').textContent='EARTH DEFENCE ON STANDBY';el('title').innerHTML='MISSION<br><span>PAUSED</span>';el('description').innerHTML='Regroup, pilot. Humanity is counting on you.';el('launch').textContent='RESUME MISSION ↗';el('hint').textContent='PRESS P OR ENTER TO RESUME';}el('status').textContent=paused?'MISSION PAUSED':`WAVE ${this.wave} · DEFEND EARTH`;}
+  pause(){if(this.mode!=='playing'&&this.mode!=='paused')return;const paused=this.mode==='playing';if(paused)this.effects.stop();this.mode=paused?'paused':'playing';this.tweens[paused?'pauseAll':'resumeAll']();el('overlay').classList.toggle('hidden',!paused);if(paused){el('badge').textContent='EARTH DEFENCE ON STANDBY';el('title').innerHTML='MISSION<br><span>PAUSED</span>';el('description').innerHTML='Regroup, pilot. Humanity is counting on you.';el('launch').textContent='RESUME MISSION ↗';el('hint').textContent='PRESS P OR ENTER TO RESUME';}el('status').textContent=paused?'MISSION PAUSED':`WAVE ${this.wave} · DEFEND EARTH`;}
   burst(x:number,y:number,colour:number,count=14){for(let i=0;i<count;i++){const p=this.add.circle(x,y,Phaser.Math.FloatBetween(1.5,3.5),colour).setDepth(8);this.tweens.add({targets:p,x:x+Phaser.Math.Between(-60,60),y:y+Phaser.Math.Between(-60,60),alpha:0,angle:180,duration:Phaser.Math.Between(250,600),onComplete:()=>p.destroy()});}}
-  hitPlayer(){if(this.invulnerable>0||this.mode!=='playing')return;this.lives--;this.invulnerable=2;this.burst(this.player.x,this.player.y,0xa5f664,22);this.cameras.main.shake(160,.007);this.tone(90,.25,'sawtooth');this.hud();if(this.lives<=0){this.mode='over';this.player.setAlpha(0);this.engine.setVisible(false);if(this.score>this.best){this.best=this.score;try{localStorage.setItem('space-attack-best',String(this.best));}catch{/* Storage may be unavailable. */}}this.hud();el('overlay').classList.remove('hidden');el('badge').textContent=this.score===this.best&&this.score>0?'NEW PERSONAL BEST':'DEFENDER DOWN';el('title').innerHTML='GAME<br><span>OVER</span>';el('description').innerHTML=`${String(this.score).padStart(6,'0')} POINTS · WAVE ${String(this.wave).padStart(2,'0')}<br>Earth needs another defender. Answer the call.`;el('launch').textContent='REDEPLOY ↗';el('hint').textContent='OR PRESS ENTER TO RESTART';el('status').textContent='DEFENDER LOST · EARTH NEEDS YOU';}}
+  hitPlayer(){if(this.invulnerable>0||this.mode!=='playing')return;this.lives--;this.invulnerable=2;this.burst(this.player.x,this.player.y,0xa5f664,22);this.cameras.main.shake(160,.007);this.effects.play(this.lives>0?'damage':'gameOver');this.hud();if(this.lives<=0){this.mode='over';this.player.setAlpha(0);this.engine.setVisible(false);if(this.score>this.best){this.best=this.score;try{localStorage.setItem('space-attack-best',String(this.best));}catch{/* Storage may be unavailable. */}}this.hud();el('overlay').classList.remove('hidden');el('badge').textContent=this.score===this.best&&this.score>0?'NEW PERSONAL BEST':'DEFENDER DOWN';el('title').innerHTML='GAME<br><span>OVER</span>';el('description').innerHTML=`${String(this.score).padStart(6,'0')} POINTS · WAVE ${String(this.wave).padStart(2,'0')}<br>Earth needs another defender. Answer the call.`;el('launch').textContent='REDEPLOY ↗';el('hint').textContent='OR PRESS ENTER TO RESTART';el('status').textContent='DEFENDER LOST · EARTH NEEDS YOU';}}
   update(_time:number,delta:number){
     const dt=Math.min(delta/1000,.04);
     if(this.mode==='paused')return;
-    for(const star of this.stars){star.dot.y+=star.speed*dt;if(star.dot.y>FIELD.height)star.dot.y=0;}
+    this.starfield.update(dt);
     if(this.mode!=='playing')return;
     const tuning=waveSettings(this.wave);
     this.elapsed+=dt;
@@ -97,7 +97,7 @@ class SpaceAttack extends Phaser.Scene {
     this.player.x=Phaser.Math.Clamp(this.player.x+((right?1:0)-(left?1:0))*420*dt,28,FIELD.width-28);
     this.player.rotation=Phaser.Math.Linear(this.player.rotation,((right?1:0)-(left?1:0))*.12,Math.min(1,dt*10));
     this.engine.setPosition(this.player.x,this.player.y+34).setAlpha(this.player.alpha).setDisplaySize(14,26+Math.sin(this.elapsed*32)*4);
-    if((this.keys.SPACE.isDown||this.touch.fire)&&this.elapsed>=this.nextFire){this.shots.push({sprite:this.add.image(this.player.x,this.player.y-30,'shot').setDisplaySize(12,26),vx:0,vy:-620});this.nextFire=this.elapsed+.18;this.tone(800,.055);}
+    if((this.keys.SPACE.isDown||this.touch.fire)&&this.elapsed>=this.nextFire){this.shots.push({sprite:this.add.image(this.player.x,this.player.y-30,'shot').setDisplaySize(12,26),vx:0,vy:-620});this.nextFire=this.elapsed+.18;this.effects.play('fire');}
     if(this.enemies.length&&this.elapsed>=this.nextAttack){
       const available=this.enemies.filter(e=>e.state==='formation');
       const e=Phaser.Utils.Array.GetRandom(available) as Enemy|undefined;
@@ -112,6 +112,7 @@ class SpaceAttack extends Phaser.Scene {
       const shooters=this.enemies.filter(e=>e.state!=='returning'&&e.state!=='entering'&&e.sprite.y<this.player.y-50);
       const shooter=Phaser.Utils.Array.GetRandom(shooters) as Enemy|undefined;
       if(shooter){
+        this.effects.play('alienFire');
         const dx=this.player.x-shooter.sprite.x,dy=this.player.y-shooter.sprite.y;
         const len=Math.hypot(dx,dy)||1,speed=tuning.shotSpeed;
         this.hostile.push({sprite:this.add.image(shooter.sprite.x,shooter.sprite.y+15,'hostile-shot').setDisplaySize(12,26).setRotation(Math.atan2(dx/len*speed,-Math.max(65,dy/len*speed))),vx:dx/len*speed,vy:Math.max(65,dy/len*speed)});
@@ -152,10 +153,10 @@ class SpaceAttack extends Phaser.Scene {
         e.state='diving';e.sprite.y=FIELD.height+45;
       }
     }
-    for(const shot of this.shots){shot.sprite.y+=shot.vy*dt;for(const e of this.enemies){if(!shot.sprite.active)break;if(e.sprite.active&&e.sprite.visible&&e.sprite.alpha>.3&&Math.abs(shot.sprite.x-e.sprite.x)<18&&Math.abs(shot.sprite.y-e.sprite.y)<21){shot.sprite.destroy();e.hp--;this.burst(e.sprite.x,e.sprite.y,this.colour(Math.max(1,e.hp)),e.hp?5:14);this.tone(e.hp?200:140,.09,'triangle');if(e.hp<=0){this.score+=e.maxHp*100+(e.state==='diving'?50:0);e.sprite.destroy();}else{e.sprite.setTexture(`${e.kind}-${e.hp}`);}this.hud();}}if(shot.sprite.active&&shot.sprite.y< -20)shot.sprite.destroy();}
+    for(const shot of this.shots){shot.sprite.y+=shot.vy*dt;for(const e of this.enemies){if(!shot.sprite.active)break;if(e.sprite.active&&e.sprite.visible&&e.sprite.alpha>.3&&Math.abs(shot.sprite.x-e.sprite.x)<18&&Math.abs(shot.sprite.y-e.sprite.y)<21){shot.sprite.destroy();e.hp--;this.burst(e.sprite.x,e.sprite.y,this.colour(Math.max(1,e.hp)),e.hp?5:14);this.effects.play(e.hp?'hit':'explosion');if(e.hp<=0){this.score+=e.maxHp*100+(e.state==='diving'?50:0);e.sprite.destroy();}else{e.sprite.setTexture(`${e.kind}-${e.hp}`);}this.hud();}}if(shot.sprite.active&&shot.sprite.y< -20)shot.sprite.destroy();}
     this.enemies=this.enemies.filter(e=>e.sprite.active);this.shots=this.shots.filter(s=>s.sprite.active);
     for(const shot of this.hostile){shot.sprite.x+=shot.vx*dt;shot.sprite.y+=shot.vy*dt;if(Math.abs(shot.sprite.x-this.player.x)<17&&Math.abs(shot.sprite.y-this.player.y)<23){shot.sprite.destroy();this.hitPlayer();}else if(shot.sprite.y>FIELD.height+20||shot.sprite.x< -20||shot.sprite.x>FIELD.width+20)shot.sprite.destroy();}this.hostile=this.hostile.filter(s=>s.sprite.active);
-    if(!this.enemies.length&&this.mode==='playing'){if(!this.nextWave){this.nextWave=this.elapsed+1.8;for(const s of this.hostile)s.sprite.destroy();this.hostile=[];el('status').textContent='EARTH ORBIT CLEAR · NEXT BREACH INBOUND';}else if(this.elapsed>=this.nextWave){this.wave++;this.nextWave=0;this.formation();this.hud();this.tone(520,.2,'triangle');}}
+    if(!this.enemies.length&&this.mode==='playing'){if(!this.nextWave){this.nextWave=this.elapsed+1.8;this.effects.play('clear');for(const s of this.hostile)s.sprite.destroy();this.hostile=[];el('status').textContent='EARTH ORBIT CLEAR · NEXT BREACH INBOUND';}else if(this.elapsed>=this.nextWave){this.wave++;this.nextWave=0;this.formation();this.hud();}}
   }
 }
 new Phaser.Game({type:Phaser.AUTO,parent:'game',width:FIELD.width,height:FIELD.height,backgroundColor:'#090e1b',pixelArt:false,antialias:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:SpaceAttack});

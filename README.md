@@ -2,7 +2,7 @@
 
 A Galaxian-inspired browser arcade game made with TypeScript and Phaser. Defend Earth against an alien invasion: enemy fleets breach orbit through a persistent wormhole in the top-left corner. It swells as each wave deploys, then contracts to its idle size after the aliens have arrived. Enemies emerge one by one and fan out into formation before attacking. The future of humanity is in your hands.
 
-All game artwork is bundled as smooth SVG illustrations and rasterised at double resolution by Phaser, with no image downloads required. Aliens have shaded bodies and expressive faces; the player ship has cockpit glass, gentle banking, and an animated engine plume above a subtle Earth horizon. Player and alien missiles have distinct shaded bodies and glowing tips, without exhaust trails. Instructions use larger, higher-contrast text with a stacked layout on smaller screens.
+All game artwork is bundled as smooth SVG illustrations and rasterised at double resolution by Phaser, with no image downloads required. Aliens have shaded bodies and expressive faces; the player ship has cockpit glass, gentle banking, and an animated engine plume above a subtle Earth horizon. A sparse, dim star field drifts slowly in three layers behind the action. Player and alien missiles have distinct shaded bodies and glowing tips, without exhaust trails. Instructions use larger, higher-contrast text with a stacked layout on smaller screens.
 
 ## Requirements
 
@@ -101,4 +101,6 @@ The playfield is 1200 × 720 and scales to the available screen width. You have 
 
 Four silhouettes have distinct flight profiles: scouts, slower weaving crabs, fast wide-sweeping mantas (wave 2 onward), and squids (wave 4 onward). Formations sway sideways, with individual aliens weaving within them. Mantas and squids sweep across the playfield during attacks and bounce at its edges; some scouts and crabs also sweep. Enemies that escape below the player re-enter above the screen and visibly descend back into formation.
 
-Species and armour are independent: wave 3 introduces two-hit orange enemies; wave 5 introduces three-hit green enemies. Colours always indicate remaining health: green → orange → red → destroyed. Best scores are saved locally when available. Sound is optional and starts muted.
+Species and armour are independent: wave 3 introduces two-hit orange enemies; wave 5 introduces three-hit green enemies. Colours always indicate remaining health: green → orange → red → destroyed. Best scores are saved locally when available.
+
+Sound starts muted; click **SOUND OFF** in the game HUD to enable it. Layered effects distinguish player and alien weapons, armour impacts, explosions, shield damage, launch, wormhole waves, sector clears, and game over. Sounds are synthesised locally using Web Audio, with controlled volume and slight pitch variation for repeated effects. There are no audio downloads or background music. Muting or pausing stops currently playing effects.
