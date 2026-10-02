@@ -3,12 +3,12 @@
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(ellipse at 50% 35%,#13203a55,transparent 65%),#080b16}
 button{font:inherit;cursor:pointer}
-header{height:82px;border-bottom:1px solid #ffffff0d;display:flex;align-items:center;justify-content:space-between;max-width:1500px;margin:auto;padding:0 40px}
+header{height:82px;border-bottom:1px solid #ffffff0d;display:flex;align-items:center;justify-content:space-between;max-width:1240px;margin:auto;padding:0 40px}
 .brand{font-family:'Barlow Condensed',sans-serif;font-size:25px;font-weight:700;letter-spacing:3px}
 .brand span{color:#a5f664}
 .tag{font-size:13px;letter-spacing:2px;color:#a0aec3}
 .tag i{display:inline-block;width:6px;height:6px;background:#a5f664;border-radius:50%;margin-right:10px;box-shadow:0 0 10px #a5f664}
-main{max-width:1460px;margin:24px auto;padding:0 30px}
+main{max-width:1200px;margin:24px auto;padding:0 30px}
 .intro{gap:24px;display:flex;align-items:end;justify-content:space-between;margin-bottom:24px}
 .eyebrow{color:#a5f664;font-size:13px;letter-spacing:3px}
 h1{font-family:'Barlow Condensed',sans-serif;font-size:52px;letter-spacing:2px;margin:7px 0 0;line-height:1}
