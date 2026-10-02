@@ -58,10 +58,48 @@ export const flameArtwork = wrap(20, 36, `
   <path d="M7 2H13Q15 13 10 22Q5 13 7 2Z" fill="#eefbff" opacity=".8"/>
 `);
 
-export const shotArtwork = wrap(10, 24, `
-  <rect x="1" y="1" width="8" height="22" rx="4" fill="#fff" opacity=".16"/>
-  <rect x="3" y="2" width="4" height="20" rx="2" fill="#fff" opacity=".65"/>
-  <rect x="4" y="3" width="2" height="18" rx="1" fill="#fff"/>
+export const shotArtwork = wrap(14, 30, `
+  <defs><linearGradient id="missile-hull" x2="1" y2="0"><stop stop-color="#476372"/><stop offset=".45" stop-color="#e4efe8"/><stop offset="1" stop-color="#789599"/></linearGradient></defs>
+  <ellipse cx="7" cy="7" rx="6" ry="6" fill="#b9f398" opacity=".12"/>
+  <path d="M4 19L1 26L5 24M10 19L13 26L9 24" fill="#7ba886" stroke="#273d46" stroke-width=".8" stroke-linejoin="round"/>
+  <path d="M7 3Q4 6 4 10V23Q7 26 10 23V10Q10 6 7 3Z" fill="url(#missile-hull)" stroke="#2b404c" stroke-width="1"/>
+  <path d="M7 3Q4 6 4 10H10Q10 6 7 3Z" fill="#c9f4a7"/>
+  <path d="M5.5 11V18" stroke="#f5fff2" stroke-width="1" stroke-linecap="round"/>
+  <path d="M4 20H10M5 24H9" stroke="#416350" stroke-width="1"/>
+`);
+
+export const hostileShotArtwork = wrap(14, 30, `
+  <defs><linearGradient id="alien-missile" x2="1" y2="0"><stop stop-color="#713746"/><stop offset=".45" stop-color="#f0c4bd"/><stop offset="1" stop-color="#a45d71"/></linearGradient></defs>
+  <ellipse cx="7" cy="7" rx="6" ry="6" fill="#ff887e" opacity=".15"/>
+  <path d="M4 19L1 25L5 23M10 19L13 25L9 23" fill="#ba647b" stroke="#422a40" stroke-width=".8" stroke-linejoin="round"/>
+  <path d="M7 3L11 10L9 23Q7 25 5 23L3 10Z" fill="url(#alien-missile)" stroke="#492b40" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M7 3L11 10H3Z" fill="#ffada0"/>
+  <path d="M6 12L5.8 17" stroke="#ffe4d4" stroke-width="1" stroke-linecap="round"/>
+  <path d="M5 20H9" stroke="#87475e" stroke-width="1"/>
+`);
+
+export const wormholeArtwork = wrap(220, 220, `
+  <defs>
+    <radialGradient id="portal-glow"><stop offset=".48" stop-color="#10102b"/><stop offset=".68" stop-color="#474099" stop-opacity=".7"/><stop offset=".8" stop-color="#a28bea" stop-opacity=".5"/><stop offset="1" stop-color="#7762ce" stop-opacity="0"/></radialGradient>
+    <radialGradient id="portal-core"><stop stop-color="#060a16"/><stop offset=".8" stop-color="#171b3e"/><stop offset="1" stop-color="#5655a1"/></radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#portal-glow)"/>
+  <circle cx="110" cy="110" r="70" fill="url(#portal-core)" stroke="#bca6f3" stroke-width="2"/>
+  <circle cx="110" cy="110" r="75" fill="none" stroke="#8eaef1" stroke-width="3" opacity=".45"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M45 108C46 35 154 28 177 92" stroke="#dacaff" stroke-width="3"/>
+    <path d="M175 116C174 185 66 193 43 128" stroke="#97dce9" stroke-width="3"/>
+    <path d="M70 114C63 73 124 57 143 92C161 127 119 151 94 132C73 116 91 91 110 102" stroke="#a39de7" stroke-width="2" opacity=".7"/>
+    <path d="M133 165C184 143 163 67 125 65" stroke="#c9b4ff" stroke-width="1.5" opacity=".7"/>
+  </g>
+  <circle cx="47" cy="93" r="3" fill="#e3d9ff"/><circle cx="171" cy="130" r="2.5" fill="#b8f1ff"/>
+`);
+
+export const earthArtwork = wrap(1200, 220, `
+  <defs><radialGradient id="earth-atmosphere" cx=".5" cy="1" r=".9"><stop stop-color="#193951"/><stop offset=".76" stop-color="#102336"/><stop offset=".94" stop-color="#317088"/><stop offset="1" stop-color="#90cddd"/></radialGradient></defs>
+  <path d="M-100 240Q600 -110 1300 240Z" fill="url(#earth-atmosphere)" stroke="#81bbc9" stroke-width="2"/>
+  <path d="M60 186Q170 140 280 158L333 195L264 220H95ZM726 152L789 130L876 141L917 182L1040 209H835L780 183Z" fill="#376866" opacity=".3"/>
+  <path d="M130 185Q295 111 423 142M722 131Q875 126 999 184" fill="none" stroke="#bddee0" stroke-width="8" opacity=".12" stroke-linecap="round"/>
 `);
 
 // Phaser's data-URL loader decodes with atob, so it requires a base64 payload.

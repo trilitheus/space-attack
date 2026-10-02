@@ -43,6 +43,36 @@ export function approach(value: number, target: number, distance: number) {
   return value + Math.max(-distance, Math.min(distance, target - value));
 }
 
+export const WORMHOLE = { x: 140, y: 80, leadIn: .4, stagger: .055, travel: 1.6 };
+
+export function wormholeAppearance(elapsed: number, deploymentDuration: number) {
+  const smooth = (value: number) => {
+    const t = Math.max(0, Math.min(1, value));
+    return t * t * (3 - 2 * t);
+  };
+  const expansion = smooth(elapsed / WORMHOLE.leadIn)
+    * (1 - smooth((elapsed - deploymentDuration) / .9));
+  const pulse = Math.sin(elapsed * 5) * .025 * expansion;
+  const size = .48 + .62 * expansion + pulse;
+  return { scaleX: size, scaleY: size * .6, alpha: .55 + .45 * expansion };
+}
+
+export function arrivalPosition(index: number, elapsed: number, home: { x: number; y: number }) {
+  const progress = Math.max(0, Math.min(1,
+    (elapsed - WORMHOLE.leadIn - index * WORMHOLE.stagger) / WORMHOLE.travel));
+  const t = progress * progress * (3 - 2 * progress);
+  const controlX = Math.max(24, Math.min(FIELD.width - 24,
+    home.x + (home.x - WORMHOLE.x) * .35 + Math.sin(index) * 35));
+  return {
+    x: (1-t)**2 * WORMHOLE.x + 2*(1-t)*t * controlX + t*t * home.x,
+    y: (1-t)**2 * WORMHOLE.y + 2*(1-t)*t * (home.y + 75) + t*t * home.y,
+    scale: .15 + .85 * progress,
+    alpha: Math.min(1, progress * 5),
+    visible: elapsed >= WORMHOLE.leadIn + index * WORMHOLE.stagger,
+    done: progress === 1,
+  };
+}
+
 export function alienKind(wave: number, row: number, col: number): AlienKind {
   const kinds: AlienKind[] = wave >= 4 ? ['scout', 'crab', 'manta', 'squid']
     : wave >= 2 ? ['scout', 'crab', 'manta'] : ['scout', 'crab'];

@@ -1,6 +1,8 @@
 # Space Attack
 
-A Galaxian-inspired browser arcade game made with TypeScript and Phaser 3. All game artwork is bundled as smooth SVG illustrations and rasterised at double resolution by Phaser, with no image downloads required. Aliens have shaded bodies and expressive faces; the player ship has cockpit glass, gentle banking, and an animated engine plume.
+A Galaxian-inspired browser arcade game made with TypeScript and Phaser. Defend Earth against an alien invasion: enemy fleets breach orbit through a persistent wormhole in the top-left corner. It swells as each wave deploys, then contracts to its idle size after the aliens have arrived. Enemies emerge one by one and fan out into formation before attacking. The future of humanity is in your hands.
+
+All game artwork is bundled as smooth SVG illustrations and rasterised at double resolution by Phaser, with no image downloads required. Aliens have shaded bodies and expressive faces; the player ship has cockpit glass, gentle banking, and an animated engine plume above a subtle Earth horizon. Player and alien missiles have distinct shaded bodies and glowing tips, without exhaust trails. Instructions use larger, higher-contrast text with a stacked layout on smaller screens.
 
 ## Run
 
