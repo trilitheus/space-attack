@@ -129,6 +129,9 @@ for (const difficulty of ['easy','medium','hard']) test(`${difficulty}: ten leve
 test('boss death and player defeat have distinct endings', () => {
   const game=scene();advanceToBoss(game);game.lives=1;game.invulnerable=0;game.hitPlayer();
   assert.equal(game.mode,'over');assert.equal(game.sounds.includes('victory'),false);
+  assert.equal(game.sounds.filter(effect=>effect==='gameOver').length,1);
+  game.hitPlayer();game.update(0,1000);
+  assert.equal(game.sounds.filter(effect=>effect==='gameOver').length,1);
   assert.match(element('title').innerHTML,/GAME/);
   assert.equal(element('boss-panel').classList.contains('hidden'),true);
   game.start();assert.equal(game.boss,undefined);assert.equal(game.wave,1);
@@ -172,5 +175,20 @@ test('level cap, aimed boss volleys and victory sound', () => {
     assert.equal(audio.length,Math.ceil(2.6*rate));
     assert(audio.every(value=>Number.isFinite(value)&&Math.abs(value)<1));
     assert(audio.some(value=>Math.abs(value)>.05));assert.equal(audio[0],0);assert.equal(audio.at(-1),0);
+  }
+});
+
+test('defeat jingle has a complete, distinct melody with clean audio boundaries', () => {
+  for(const rate of [44100,48000]){
+    const defeat=synthesise('gameOver',rate,()=>.5);
+    const victory=synthesise('victory',rate,()=>.5);
+    assert.equal(defeat.length,Math.ceil(2.6*rate));
+    assert(defeat.every(value=>Number.isFinite(value)&&Math.abs(value)<1));
+    assert.equal(defeat[0],0);assert.equal(defeat.at(-1),0);
+    for(const start of [.25,.65,1.05,1.35,1.7]){
+      const phrase=defeat.subarray(Math.floor(start*rate),Math.floor((start+.1)*rate));
+      assert(phrase.some(value=>Math.abs(value)>.005));
+    }
+    assert(defeat.some((value,index)=>Math.abs(value-victory[index])>.05));
   }
 });

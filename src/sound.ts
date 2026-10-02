@@ -43,12 +43,16 @@ const DESIGNS: Record<SoundEffect, SoundDesign> = {
     { from: 493.88, to: 493.88, gain: .11, delay: .1, duration: .25 },
     { from: 587.33, to: 587.33, gain: .12, delay: .2, duration: .32 },
   ] },
-  gameOver: { duration: 1.5, voices: [
-    { from: 120, to: 30, gain: .28, duration: .6 },
-    { from: 392, to: 392, gain: .13, delay: .2, duration: .32 },
-    { from: 329.63, to: 329.63, gain: .13, delay: .45, duration: .32 },
-    { from: 220, to: 220, gain: .16, delay: .7, duration: .65 },
-  ], noise: [{ gain: .4, cutoff: 1400, duration: .6 }] },
+  gameOver: { duration: 2.6, voices: [
+    // A final impact, descending minor melody, and a soft unresolved chord.
+    { from: 110, to: 30, gain: .23, duration: .45 },
+    ...[659.25, 587.33, 523.25, 493.88, 440].map((frequency, index) => ({
+      from: frequency, to: frequency, gain: .15, delay: .2 + index * .2, duration: .38,
+    })),
+    ...[110, 261.63, 329.63].map(frequency => ({
+      from: frequency, to: frequency, gain: .09, delay: 1.25, duration: 1.1,
+    })),
+  ], noise: [{ gain: .27, cutoff: 1100, duration: .35 }] },
   victory: { duration: 2.6, voices: [
     ...[523.25, 659.25, 783.99, 1046.5].map((frequency, index) => ({
       from: frequency, to: frequency, gain: .17, delay: index * .18, duration: .4,

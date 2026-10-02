@@ -121,7 +121,7 @@ Four silhouettes have distinct flight profiles: scouts, slower weaving crabs, fa
 
 Species and armour are independent. Colours always indicate remaining health: green → orange → red → destroyed. Best scores are saved locally for each difficulty when storage is available. Existing best scores from before the difficulty picker are retained under Medium.
 
-Sound starts muted; click **SOUND OFF** in the game HUD to enable it. Layered effects distinguish player and alien weapons, armour impacts, explosions, shield damage, launch, wormhole waves, sector clears, and game over. Sounds are synthesised locally using Web Audio, with controlled volume and slight pitch variation for repeated effects. There are no audio downloads or background music. Muting or pausing stops currently playing effects.
+Sound starts muted; click **SOUND OFF** in the game HUD to enable it. Layered effects distinguish player and alien weapons, armour impacts, explosions, shield damage, launch, wormhole waves, and sector clears. Losing your last shield plays a defeat jingle with a descending minor melody; saving Earth plays a triumphant victory jingle. Both respect the sound toggle, and restarting stops the previous ending's audio. Sounds are synthesised locally using Web Audio, with controlled volume and slight pitch variation for repeated effects. There are no audio downloads or background music. Muting or pausing stops currently playing effects.
 
 ## Development checks
 

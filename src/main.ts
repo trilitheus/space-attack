@@ -161,7 +161,9 @@ class SpaceAttack extends Phaser.Scene {
   hitPlayer(){
     if(this.invulnerable>0||this.mode!=='playing')return;
     this.lives--;this.invulnerable=2;this.burst(this.player.x,this.player.y,0xa5f664,22);
-    this.cameras.main.shake(160,.007);this.effects.play(this.lives>0?'damage':'gameOver');this.hud();
+    this.cameras.main.shake(160,.007);
+    if(this.lives>0){this.effects.play('damage');}else{this.effects.stop();this.effects.play('gameOver');}
+    this.hud();
     if(this.lives<=0){
       this.mode='over';this.endControls();this.player.setAlpha(0);this.engine.setVisible(false);el('boss-panel').classList.add('hidden');this.saveBest();
       el('overlay').classList.remove('hidden');el('badge').textContent=this.score===this.best&&this.score>0?'NEW PERSONAL BEST':'DEFENDER DOWN';
