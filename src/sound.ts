@@ -1,4 +1,4 @@
-export type SoundEffect = 'fire' | 'alienFire' | 'hit' | 'explosion' | 'damage' | 'launch' | 'wave' | 'clear' | 'gameOver';
+export type SoundEffect = 'fire' | 'alienFire' | 'hit' | 'explosion' | 'damage' | 'launch' | 'wave' | 'clear' | 'gameOver' | 'victory';
 type Voice = { from: number; to: number; gain: number; delay?: number; duration: number; shape?: 'sine' | 'triangle' };
 type Noise = { gain: number; cutoff: number; duration: number; delay?: number; attack?: number };
 type SoundDesign = { duration: number; voices: Voice[]; noise?: Noise[] };
@@ -49,6 +49,15 @@ const DESIGNS: Record<SoundEffect, SoundDesign> = {
     { from: 329.63, to: 329.63, gain: .13, delay: .45, duration: .32 },
     { from: 220, to: 220, gain: .16, delay: .7, duration: .65 },
   ], noise: [{ gain: .4, cutoff: 1400, duration: .6 }] },
+  victory: { duration: 2.6, voices: [
+    ...[523.25, 659.25, 783.99, 1046.5].map((frequency, index) => ({
+      from: frequency, to: frequency, gain: .17, delay: index * .18, duration: .4,
+    })),
+    ...[523.25, 659.25, 783.99, 1046.5].map(frequency => ({
+      from: frequency, to: frequency, gain: .095, delay: 1.05, duration: 1.3,
+    })),
+    { from: 130.81, to: 130.81, gain: .15, delay: 1.05, duration: 1.3 },
+  ] },
 };
 
 export const EFFECTS = Object.keys(DESIGNS) as SoundEffect[];

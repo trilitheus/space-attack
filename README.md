@@ -2,6 +2,8 @@
 
 A Galaxian-inspired browser arcade game made with TypeScript and Phaser. Defend Earth against an alien invasion: enemy fleets breach orbit through a persistent wormhole in the top-left corner. It swells as each wave deploys, then contracts to its idle size after the aliens have arrived. Enemies emerge one by one and fan out into formation before attacking. The future of humanity is in your hands.
 
+The campaign has **10 levels**. Survive nine invasion waves, then defeat the alien overlord and its escorts in the final battle to save Earth.
+
 All game artwork is bundled as smooth SVG illustrations and rasterised at double resolution by Phaser, with no image downloads required. Aliens have shaded bodies and expressive faces; the player ship has cockpit glass, gentle banking, and an animated engine plume above a subtle Earth horizon. A sparse, dim star field drifts slowly in three layers behind the action. Player and alien missiles have distinct shaded bodies and glowing tips, without exhaust trails. Instructions use larger, higher-contrast text with a stacked layout on smaller screens.
 
 ## Requirements
@@ -109,8 +111,23 @@ Choose **Easy**, **Medium**, or **Hard** on the start or game-over screen before
 
 Enemy movement, dives, sweeping attacks, and missiles all follow the selected difficulty. Every mode retains three shields and introduces two-hit enemies on wave 3 and three-hit enemies on wave 5. Enemy counts and speeds increase across waves, with counts capped at 50. On Medium, the first six waves have 12, 14, 21, 24, 32, and 36 enemies.
 
+### Final boss and victory
+
+Level 10 features a large alien overlord defended by two rows of regular aliens. The boss enters through the wormhole, sweeps across the upper playfield, and fires aimed missile fans. Its health bar shows exactly how many hits remain: **24 on Easy, 36 on Medium, and 48 on Hard**. Each player missile removes one health point. Below half health, the boss fires wider, more frequent volleys.
+
+Defeating the boss immediately ends the invasion, clears the remaining threats, and awards **5,000 bonus points**. The victory screen congratulates you for saving Earth, and a victory jingle plays when sound is enabled. There is no level 11. Choose a difficulty and click **PLAY AGAIN**, or press Enter, to start a new campaign from level 1.
+
 Four silhouettes have distinct flight profiles: scouts, slower weaving crabs, fast wide-sweeping mantas (wave 2 onward), and squids (wave 4 onward). Formations sway sideways, with individual aliens weaving within them. Mantas and squids sweep across the playfield during attacks and bounce at its edges; some scouts and crabs also sweep. Enemies that escape below the player re-enter above the screen and visibly descend back into formation.
 
 Species and armour are independent. Colours always indicate remaining health: green → orange → red → destroyed. Best scores are saved locally for each difficulty when storage is available. Existing best scores from before the difficulty picker are retained under Medium.
 
 Sound starts muted; click **SOUND OFF** in the game HUD to enable it. Layered effects distinguish player and alien weapons, armour impacts, explosions, shield damage, launch, wormhole waves, sector clears, and game over. Sounds are synthesised locally using Web Audio, with controlled volume and slight pitch variation for repeated effects. There are no audio downloads or background music. Muting or pausing stops currently playing effects.
+
+## Development checks
+
+```bash
+npm test
+npm run build
+```
+
+On Windows, use `npm.cmd test` and `npm.cmd run build`. The campaign tests use Node.js 24 and exercise the actual scene logic with rendering and input stubs: progression through all 10 levels, boss damage and health display, victory, defeat, difficulty settings, and restarting. They also check boss volleys and the generated victory audio. Browser rendering and play feel still need manual play-testing.

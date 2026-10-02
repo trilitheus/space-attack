@@ -102,6 +102,25 @@ export const earthArtwork = wrap(1200, 220, `
   <path d="M130 185Q295 111 423 142M722 131Q875 126 999 184" fill="none" stroke="#bddee0" stroke-width="8" opacity=".12" stroke-linecap="round"/>
 `);
 
+export const bossArtwork = wrap(180, 124, `
+  <defs>
+    <linearGradient id="boss-shell" x2=".3" y2="1"><stop stop-color="#c3b2df"/><stop offset=".4" stop-color="#776295"/><stop offset="1" stop-color="#352d50"/></linearGradient>
+    <linearGradient id="boss-armour" x2="0" y2="1"><stop stop-color="#a49abe"/><stop offset="1" stop-color="#4b4467"/></linearGradient>
+    <radialGradient id="boss-core"><stop stop-color="#fff3c4"/><stop offset=".45" stop-color="#ffab6b"/><stop offset="1" stop-color="#ba4763"/></radialGradient>
+  </defs>
+  <path d="M53 38L29 21L15 28L23 54L6 76Q3 86 14 86L39 77L32 102L46 114L60 91M127 38L151 21L165 28L157 54L174 76Q177 86 166 86L141 77L148 102L134 114L120 91" fill="url(#boss-armour)" stroke="#242b3e" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M42 54C41 27 60 14 90 14C120 14 139 27 138 54L134 78Q121 105 90 108Q59 105 46 78Z" fill="url(#boss-shell)" stroke="#222a3d" stroke-width="3"/>
+  <path d="M65 19L59 5L73 10L90 2L107 10L121 5L115 19" fill="#c7b3d8" stroke="#303044" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M55 39Q90 20 125 39" fill="none" stroke="#d8c8e6" stroke-width="3" opacity=".55" stroke-linecap="round"/>
+  <path d="M52 50Q67 45 81 58Q68 73 53 64ZM128 50Q113 45 99 58Q112 73 127 64Z" fill="#1b2539" stroke="#ada0c3" stroke-width="1.5"/>
+  <ellipse cx="67" cy="58" rx="6" ry="7" fill="#ffe1a7"/><ellipse cx="113" cy="58" rx="6" ry="7" fill="#ffe1a7"/>
+  <ellipse cx="69" cy="59" rx="2.5" ry="5" fill="#783e55"/><ellipse cx="111" cy="59" rx="2.5" ry="5" fill="#783e55"/>
+  <path d="M50 45L82 53M130 45L98 53" stroke="#342b4d" stroke-width="5" stroke-linecap="round"/>
+  <path d="M65 82Q90 72 115 82L109 90Q90 84 71 90Z" fill="#242638"/>
+  <circle cx="90" cy="95" r="8" fill="url(#boss-core)" stroke="#372d4a" stroke-width="2"/>
+  <path d="M17 69L30 61M163 69L150 61M41 102L49 94M139 102L131 94" stroke="#dc9d94" stroke-width="3" stroke-linecap="round"/>
+`);
+
 // Phaser's data-URL loader decodes with atob, so it requires a base64 payload.
 export const svgData = (svg: string) => {
   const bytes = new TextEncoder().encode(svg);
