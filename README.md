@@ -4,6 +4,8 @@ A Galaxian-inspired browser arcade game made with TypeScript and Phaser. Defend 
 
 The campaign has **10 levels**. Survive nine invasion waves, then defeat the alien overlord and its escorts in the final battle to save Earth.
 
+**Play online:** [Space Attack on GitHub Pages](https://trilitheus.github.io/space-attack/).
+
 All game artwork is bundled as smooth SVG illustrations and rasterised at double resolution by Phaser, with no image downloads required. Aliens have shaded bodies and expressive faces; the player ship has cockpit glass, gentle banking, and an animated engine plume above a subtle Earth horizon. A sparse, dim star field drifts slowly in three layers behind the action. Player and alien missiles have distinct shaded bodies and glowing tips, without exhaust trails. Instructions use larger, higher-contrast text with a stacked layout on smaller screens.
 
 ## Requirements
@@ -80,6 +82,21 @@ npm run preview
 The build checks TypeScript and writes the production website to **`dist/`**. Preview normally serves it at **http://localhost:4173/**; use the URL printed in the terminal. On Windows, run `npm.cmd run build` and `npm.cmd run preview`.
 
 To publish the game, upload the contents of `dist/` to a static web host. The preview command is for checking the build locally. Serve the game over HTTP rather than double-clicking `index.html`.
+
+## GitHub Pages hosting
+
+The live game is hosted at **https://trilitheus.github.io/space-attack/**. The deployment workflow in [`.github/workflows/pages.yml`](.github/workflows/pages.yml) runs automatically when changes are pushed to `main`. It installs the locked dependencies, runs the campaign tests, builds with the `/space-attack/` asset base path, and deploys `dist/` to Pages. A failed test or build prevents deployment.
+
+To deploy an update, commit your changes and push `main` to GitHub. Track progress in the repository's [Actions tab](https://github.com/trilitheus/space-attack/actions/workflows/pages.yml). You can also trigger the workflow there using **Run workflow**. Repository **Settings → Pages → Source** must be set to **GitHub Actions**.
+
+To check the Pages build locally:
+
+```bash
+npm run build -- --base=/space-attack/
+npm run preview -- --base=/space-attack/
+```
+
+Open **http://localhost:4173/space-attack/**, or the URL printed by Vite. On Windows, substitute `npm.cmd` for `npm`. Ordinary `npm run dev` and `npm run build` continue to use the root URL for local development and other static hosts. See the [Vite deployment guide](https://vite.dev/guide/static-deploy#github-pages) for the repository base-path requirement.
 
 ## Troubleshooting
 
